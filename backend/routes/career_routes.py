@@ -12,10 +12,10 @@ bp=Blueprint("career",__name__)
 def plan():
     uid=current_user_id(); d=request.get_json(silent=True) or {}; rows=user_rows("profiles",uid); profile=rows[0] if rows else {}; payload={**profile,**d}; role=text(payload.get("target_role"),"Target role",120,True)
     try:
-        result=generate("Create a realistic adaptive 30-day career plan. Return keys summary, strengths, skill_gaps, plan (30 objects with day, topic, why, objective, practice, estimated_minutes, resources), next_action. Do not invent URLs; resources should use descriptive names only.",payload,request_budget_seconds=25)
+        result=generate("Create a realistic adaptive 30-day career plan. Return keys summary, strengths, skill_gaps, plan (30 objects with day, topic, why, objective, practice, estimated_minutes, resources), next_action. Do not invent URLs; resources should use descriptive names only.",payload,request_budget_seconds=100)
         result["mode"]="gemini"
     except ApiError as error:
-        fallback_codes={"ai_not_configured","ai_rate_limited","ai_unavailable","ai_timeout","ai_model_unavailable","ai_invalid_response","ai_auth_failed"}
+        fallback_codes={"ai_not_configured","ai_rate_limited","ai_unavailable","ai_timeout","ai_model_unavailable","ai_invalid_response","ai_auth_failed","ai_request_rejected"}
         if error.code not in fallback_codes:
             raise
         result=fallback_plan(role,payload.get("skills",[]),payload.get("available_time","1 hour"))

@@ -41,7 +41,13 @@ def _configured_models():
 
 
 def _parse_json_response(response):
-    raw = response.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+    parts = response.json()["candidates"][0]["content"]["parts"]
+    # Gemini may include thought/auxiliary parts before its user-facing answer.
+    # Read all visible text parts so JSON parsing does not depend on part order.
+    visible_text = [part["text"] for part in parts if isinstance(part, dict) and part.get("text") and not part.get("thought")]
+    if not visible_text:
+        visible_text = [part["text"] for part in parts if isinstance(part, dict) and part.get("text")]
+    raw = "\n".join(visible_text).strip()
     raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw)
     result = json.loads(raw)
     if not isinstance(result, dict):
@@ -67,7 +73,9 @@ def generate(task, payload, request_budget_seconds=None):
     )
     request_body = {
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"responseMimeType": "application/json", "temperature": 0.35},
+        # Gemini 3 models reject legacy sampling controls such as temperature.
+        # JSON mode is supported and keeps the response machine-readable.
+        "generationConfig": {"responseMimeType": "application/json", "maxOutputTokens": 8192},
     }
     failures = []
     budget = REQUEST_BUDGET_SECONDS if request_budget_seconds is None else max(1, request_budget_seconds)
@@ -130,6 +138,23 @@ def generate(task, payload, request_budget_seconds=None):
                     model_failed_over = True
                     break
 
+                if not response.ok:
+                    failures.append(("status", response.status_code))
+                    provider_message = ""
+                    try:
+                        provider_message = str(response.json().get("error", {}).get("message", ""))
+                    except (ValueError, AttributeError):
+                        pass
+                    provider_message = provider_message.replace(key, "[REDACTED]")[:240]
+                    logger.warning(
+                        "Gemini model %s rejected the request with HTTP %d: %s",
+                        model,
+                        response.status_code,
+                        provider_message or "provider message unavailable",
+                    )
+                    model_failed_over = True
+                    break
+
                 response.raise_for_status()
                 try:
                     return _parse_json_response(response)
@@ -158,6 +183,12 @@ def generate(task, payload, request_budget_seconds=None):
             "Gemini models are currently rate-limited. Please wait and try again.",
             503,
             "ai_rate_limited",
+        )
+    if 400 in statuses:
+        raise ApiError(
+            "Gemini rejected the request. Check the API model configuration and try again.",
+            502,
+            "ai_request_rejected",
         )
     if any(status in {500, 502, 503, 504} for status in statuses):
         raise ApiError(
