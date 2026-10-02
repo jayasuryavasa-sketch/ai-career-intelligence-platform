@@ -1,0 +1,13 @@
+.env
+backend/.env
+backend/__pycache__/
+backend/data/*.json
+backend/uploads/*
+!backend/data/.gitkeep
+!backend/uploads/.gitkeep
+*.pyc
+backend/.venv/
+.venv/
+venv/
+node_modules/
+.vercel/
