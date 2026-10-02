@@ -464,3 +464,8 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{display:non
 #app[data-view="profile"] #profile-form>.field{margin:0 0 18px!important;padding:15px 16px!important;border-color:rgba(221,185,138,.18);border-radius:14px;background:linear-gradient(145deg,rgba(221,185,138,.055),rgba(255,255,255,.014))}
 #app[data-view="profile"] #profile-form>.field:last-of-type{margin-bottom:16px!important}
 #app[data-view="profile"] #profile-form>.button{margin-top:2px}
+
+/* Separate the roadmap inputs from the skills textarea in Career Guide. */
+#app[data-view="career-guide"] .career-form-panel>.grid{gap:16px;margin-bottom:20px}
+#app[data-view="career-guide"] .career-form-panel>.field{margin:0 0 18px!important;padding:15px 16px!important;border-color:rgba(221,185,138,.18);border-radius:14px;background:linear-gradient(145deg,rgba(221,185,138,.055),rgba(255,255,255,.014))}
+#app[data-view="career-guide"] .career-form-panel>.button{margin-top:2px}
