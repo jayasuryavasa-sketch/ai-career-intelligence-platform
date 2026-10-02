@@ -4,7 +4,7 @@ services:
     runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn --timeout 130 app:app
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION

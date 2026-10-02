@@ -43,7 +43,7 @@ flowchart LR
 - **Frontend:** [ai-career-intelligence-platform-fro.vercel.app](https://ai-career-intelligence-platform-fro.vercel.app)
 - **Backend health:** [Render API status](https://ai-career-intelligence-platform-dhyb.onrender.com/api/health)
 - **Frontend project root:** `frontend/` (Vercel, preset **Other**, no build step)
-- **Backend project root:** `backend/` (Render, `gunicorn app:app`)
+- **Backend project root:** `backend/` (Render, `gunicorn --timeout 130 app:app`)
 
 ### Data persistence
 

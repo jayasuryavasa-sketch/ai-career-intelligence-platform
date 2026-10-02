@@ -49,7 +49,7 @@ def _parse_json_response(response):
     return result
 
 
-def generate(task, payload):
+def generate(task, payload, request_budget_seconds=None):
     key = os.getenv("GEMINI_API_KEY")
     if not key:
         raise ApiError(
@@ -70,7 +70,8 @@ def generate(task, payload):
         "generationConfig": {"responseMimeType": "application/json", "temperature": 0.35},
     }
     failures = []
-    deadline = time.monotonic() + REQUEST_BUDGET_SECONDS
+    budget = REQUEST_BUDGET_SECONDS if request_budget_seconds is None else max(1, request_budget_seconds)
+    deadline = time.monotonic() + budget
 
     for model in _configured_models():
         if time.monotonic() >= deadline:
