@@ -447,3 +447,13 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{display:non
 #app[data-view="dashboard"] .dashboard-momentum-core>b{font-size:47px;font-weight:800;letter-spacing:-1.8px;font-variant-numeric:tabular-nums;text-shadow:0 2px 16px rgba(241,207,155,.42)}
 #app[data-view="dashboard"] .dashboard-momentum-core>b>small{font-size:20px;letter-spacing:-.5px}
 @media(max-width:650px){#app[data-view="dashboard"] .dashboard-signal-card>div>b{min-width:52px;height:39px;font-size:26px;border-radius:11px}#app[data-view="dashboard"] .dashboard-momentum-core>b{font-size:43px}}
+
+/* Make the landing-page section links clear, intentional navigation controls. */
+.landing .topbar{gap:24px}
+.landing .topbar nav{display:flex;align-items:center;gap:9px;margin-left:auto;color:#f1eee8;font-size:14px}
+.landing .topbar nav a{display:inline-flex;align-items:center;min-height:42px;padding:0 15px;border:1px solid rgba(221,185,138,.25);border-radius:11px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));color:#eee8de;font-weight:600;transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+.landing .topbar nav a:hover{transform:translateY(-1px);border-color:rgba(221,185,138,.62);background:rgba(221,185,138,.12);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+.landing .topbar nav a:focus-visible{outline:2px solid #e8c18e;outline-offset:3px}
+.landing .top-actions .button-quiet{min-height:42px;padding:0 16px;border:1px solid rgba(221,185,138,.2);background:rgba(255,255,255,.035);color:#eee8de}
+.landing .top-actions .button-quiet:hover{background:rgba(221,185,138,.1);border-color:rgba(221,185,138,.5)}
+@media(max-width:680px){.landing .topbar{height:auto;min-height:66px;flex-wrap:wrap;row-gap:10px;padding:10px 0 12px}.landing .topbar nav{order:3;width:100%;justify-content:center;margin:0;gap:8px}.landing .topbar nav a{min-height:36px;padding:0 13px;font-size:12px}.landing .top-actions .button-quiet{display:none}}
