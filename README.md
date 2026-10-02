@@ -1,42 +1,57 @@
-# AI Career Intelligence Platform
+<div align="center">
+  <img src="frontend/favicon.svg" width="54" height="54" alt="CareerOS mark">
+  <h1>CareerOS</h1>
+  <p><strong>Turn career goals into a clear next move.</strong></p>
+  <p>A focused workspace for career planning, resume insights, skill growth and interview practice.</p>
+  <p>
+    <a href="https://ai-career-intelligence-platform-fro.vercel.app"><strong>Open CareerOS</strong></a>
+    &nbsp;·&nbsp;
+    <a href="https://ai-career-intelligence-platform-dhyb.onrender.com/api/health">API status</a>
+  </p>
+</div>
 
-A career planning workspace with profile-aware planning, deterministic resume scoring, skill comparison, project directions, job description analysis, interview practice, application tracking and progress views. The frontend is static HTML/CSS/vanilla JavaScript; the REST API is Flask. User records live in user-scoped JSON files.
+---
 
-## What works
+## The idea
 
-- Account registration, sign-in/out, hashed passwords, expiring one-use password reset tokens and optional SMTP delivery.
-- Profile reused across modules, 30-day starter roadmap, role skill comparison and transparent readiness simulation.
-- In-memory PDF/DOCX/TXT extraction with a deterministic weighted ATS estimate and resume version history.
-- Job description keyword comparison, non-live role direction suggestions linking to established job portals, and project recommendations.
-- Interview question flow; Gemini-based evaluation when configured, with an honest note when unavailable.
-- Application create/update/delete, status pipeline, progress dashboard and mobile navigation.
-- Responsive dark glass interface with an animated CSS AI guide illustration and reduced reliance on heavy graphics.
+CareerOS brings the next steps of a job search into one calm, connected workspace. Save your goals once, turn them into a practical roadmap, and keep your learning, applications and interview practice moving forward.
 
-Gemini-dependent personalization reports a distinct configuration/service error when Gemini is unavailable. Career plans, skill comparison, project suggestions and interview prompts include useful local fallback behavior. Job role suggestions are not represented as live vacancies, and no third-party job URLs are invented.
+**Set a direction → Build useful skills → Show your work → Track progress**
 
-## Structure
+## What you can do
 
-```text
-frontend/                 Static Vercel site
-  index.html
-  pages/                  Login, registration and product modules
-  css/main.css
-  js/config.js            Central API base configuration
-  js/api.js               Centralized fetch, errors, timeout, credentials
-  js/auth.js
-  js/app.js
-backend/                  Flask API for Render
-  app.py
-  routes/                 REST blueprints by feature
-  services/               Gemini, ATS and local career plan services
-  utils/                  JSON persistence, validation, auth and document parsing
-  data/                   JSON files created as needed
-  uploads/                Reserved; uploaded resumes are not retained
+| Plan | Prepare | Keep moving |
+| --- | --- | --- |
+| Create a 30-day career roadmap | Review a resume with a transparent ATS estimate | Track applications and interviews |
+| Compare current skills with a target role | Analyze a job description and practice interviews | See milestones and recent career activity |
+| Get project ideas based on your profile | Use optional Gemini feedback for AI-assisted guidance | Reuse saved career context across tools |
+
+## How it fits together
+
+```mermaid
+flowchart LR
+    U[Your browser] --> V[Vercel · static frontend]
+    V -->|HTTPS API requests| R[Render · Flask API]
+    R --> J[(User-scoped JSON files)]
+    R -. optional AI feedback .-> G[Google Gemini]
 ```
 
-## Local setup
+**Stack:** HTML, CSS and vanilla JavaScript · Python and Flask · Render · Vercel · optional Gemini API
 
-Use Python 3.10+ and serve the static frontend from a local HTTP server (do not open HTML with `file://`).
+## Live deployment
+
+- **Frontend:** [ai-career-intelligence-platform-fro.vercel.app](https://ai-career-intelligence-platform-fro.vercel.app)
+- **Backend health:** [Render API status](https://ai-career-intelligence-platform-dhyb.onrender.com/api/health)
+- **Frontend project root:** `frontend/` (Vercel, preset **Other**, no build step)
+- **Backend project root:** `backend/` (Render, `gunicorn app:app`)
+
+### Data persistence
+
+The API currently stores account and career records in user-scoped JSON files. Resume files are parsed in memory and are not retained. The current Render Free service has ephemeral storage, so saved JSON data is **not guaranteed to survive a service restart or redeploy**. The repository’s Render Blueprint includes a persistent disk, which requires a compatible paid Render service.
+
+## Run locally
+
+Use Python 3.10 or newer. Start the API in one PowerShell window:
 
 ```powershell
 cd backend
@@ -47,91 +62,72 @@ Copy-Item .env.example .env
 py app.py
 ```
 
-In another terminal, serve `frontend/` on port 5500, for example with VS Code Live Server. Visit `http://127.0.0.1:5500/`. Edit `backend/.env` and set a random `SECRET_KEY`; add a Gemini key to enable personalized AI responses. Restart the backend after environment changes. Local data files are created automatically in `backend/data/`.
+Set a unique `SECRET_KEY` in `backend/.env`. To enable Gemini responses, add your own `GEMINI_API_KEY` there. Keep `.env` private and never commit it.
 
-For development password recovery, set `FLASK_DEBUG=1`; without SMTP, the API returns a development-only one-time token. Production responses never include reset tokens. Configure all SMTP variables to deliver reset emails.
+Serve the frontend from a second PowerShell window:
+
+```powershell
+cd frontend
+py -m http.server 5500
+```
+
+Open `http://127.0.0.1:5500`. The frontend defaults to the deployed API. To use your local API for this browser, open its developer console and run:
+
+```js
+localStorage.setItem('career_api_url', 'http://127.0.0.1:5000/api');
+```
+
+Reload the page. To return to the deployed API later, run `localStorage.removeItem('career_api_url')` and reload.
 
 ## Configuration
 
-`backend/.env.example` documents:
+| Variable | Required | Purpose |
+| --- | :---: | --- |
+| `SECRET_KEY` | Yes | Signs secure Flask sessions; use a long, random value |
+| `FRONTEND_URL` | Yes in deployment | Exact frontend origin allowed by CORS, with no trailing slash |
+| `GEMINI_API_KEY` | No | Enables Gemini-assisted guidance and feedback |
+| `GEMINI_MODEL` | No | Primary Gemini model |
+| `GEMINI_FALLBACK_MODELS` | No | Models tried if the primary model is unavailable |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM` | No | Sends password-reset email |
+| `DATA_DIR` | No | JSON storage location; defaults to `backend/data` |
 
-| Variable | Purpose |
+See [`backend/.env.example`](backend/.env.example) for local values. Set production secrets in Render’s environment settings, never in frontend code.
+
+## API at a glance
+
+All routes use the `/api` prefix. Authenticated requests use secure HTTP-only session cookies.
+
+| Area | Routes |
 | --- | --- |
-| `SECRET_KEY` | Flask session signing key; use a strong unique secret in production |
-| `GEMINI_API_KEY` | Server-only Google Gemini API credential |
-| `GEMINI_MODEL` | Gemini model identifier |
-| `GEMINI_FALLBACK_MODELS` | Comma-separated fallback model IDs used on rate limits, temporary provider failures, unavailable models, or unusable responses |
-| `FRONTEND_URL` | Allowed frontend origin; comma-separated origins are supported |
-| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USERNAME`, `SMTP_PASSWORD`, `SMTP_FROM` | Optional password reset email delivery |
-| `DATA_DIR` | JSON data directory; defaults to `backend/data` |
+| Health and accounts | `GET /health`, `/auth/register`, `/auth/login`, `/auth/logout` |
+| Career profile and roadmap | `/profile`, `/career/plan`, `/skills/analyze`, `/skills/gaps` |
+| Resume and job preparation | `/resume/analyze`, `/resume/history`, `/jobs/match`, `/jobs/analyze-description` |
+| Practice and projects | `/interview/start`, `/interview/answer`, `/projects/recommend`, `/assistant/message` |
+| Applications and progress | `/applications`, `/progress` |
 
+## Privacy and scoring
 
-The frontend API base defaults to `http://127.0.0.1:5000/api`. Before deploying, edit `frontend/js/config.js` and set `window.CAREER_API_URL` to your Render HTTPS API origin plus `/api`. Never place provider secrets in frontend code.
+- Passwords are hashed; reset tokens are one-use and expire after 30 minutes.
+- Resume uploads are validated, parsed in memory and not stored as files.
+- ATS estimates come from a reproducible Python heuristic. Gemini can explain feedback but does not determine the numeric score.
+- Job suggestions are directions to explore, not live vacancy claims. Resume scores are estimates, not guarantees of hiring outcomes.
+- CORS is restricted to the configured frontend origin, and authenticated write requests use CSRF protection.
 
-## API overview
+## Repository map
 
-All application APIs are rooted at `/api`. Authenticated routes use an HTTP-only Flask session cookie and send credentials with CORS.
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| GET | `/health` | Service health and AI configured status |
-| POST | `/auth/register`, `/auth/login`, `/auth/logout` | Account lifecycle |
-| POST | `/auth/forgot-password`, `/auth/reset-password` | One-use, 30-minute password reset |
-| GET/PUT | `/profile` | Current user's career profile |
-| GET/POST | `/career/plan` | Read or generate an adaptive career plan |
-| POST/GET | `/skills/analyze`, `/skills/gaps` | Skill comparison |
-| POST/GET | `/resume/analyze`, `/resume/history` | Document analysis and evolution |
-| POST | `/jobs/match`, `/jobs/analyze-description` | Role direction and JD comparison |
-| POST | `/projects/recommend` | Project directions |
-| POST | `/interview/start`, `/interview/answer` | Interview question and answer evaluation |
-| POST | `/assistant/message` | Career Q&A grounded in the signed-in user's saved context |
-| GET/POST/PUT/DELETE | `/applications` | User's application tracker |
-| GET | `/progress` | User-scoped career progress |
-
-JSON errors use `{ "error": { "code": "...", "message": "..." } }`. The API validates inputs and uses `user_id` scoping for records. The JSON store uses atomic replacement and a process lock; it is intended for a small single-instance project, not high-concurrency or multi-instance production workloads.
-
-## Resume scoring
-
-ATS scoring is reproducible and computed in Python from target-role/profile keyword overlap, sections, contact details, experience evidence, education, certifications and formatting heuristics. Gemini may explain findings; it does not set the numeric score. It is an estimate, not a guarantee of how any applicant tracking system will rank a resume. Uploaded files are size/extension checked and parsed in memory; the app does not retain their bytes.
-
-## Deployment
-
-### Render backend
-
-Deploy the `backend/` directory as the Render root (or use `backend/render.yaml`). Set `SECRET_KEY`, `FRONTEND_URL`, `GEMINI_API_KEY` and optional SMTP values. The included blueprint attaches a persistent disk at `/var/data` for JSON files. The Flask cookie is HTTP-only; HTTPS deployments use secure, cross-site cookies. Configure Render's allowed-origin value to your exact Vercel origin.
-
-### Vercel frontend
-
-Import the repository and set the project root to `frontend/`. Configure the API base as described above, using the deployed Render HTTPS origin. The static site has no build step. Configure the matching Render `FRONTEND_URL` origin. Both services must use HTTPS in production for session cookies.
-
-## Security and limitations
-
-- Passwords use Werkzeug's password hashing; session cookies are HTTP-only and use secure flags on HTTPS deployments. Mutating authenticated requests also require a per-session CSRF token.
-- Gemini and SMTP secrets remain in backend environment variables; reset tokens are hashed at rest and expire after 30 minutes.
-- CORS is limited to configured frontend origins; request fields, upload size and extensions are validated.
-- JSON flat files do not provide database-grade transactions, multi-process locking, backups or horizontal scaling. Render persistent disk is required to retain data across restarts.
-- SMTP is optional but required for real password recovery outside development mode. Gemini requires a configured API key. Third-party services can change their limits and availability.
-- The front end is a static site and the API uses cookie sessions. Set the API URL before app scripts load; do not use wildcard CORS.
-
-## Verification
-
-Run the backend checks from `backend/`:
-
-```powershell
-py -m unittest discover -s tests -v
-py -m compileall app.py routes services utils
+```text
+frontend/       Static pages, styles and browser-side API client
+backend/
+  app.py        Flask application and security configuration
+  routes/       API endpoints
+  services/     Resume analysis, career planning and optional Gemini
+  utils/        JSON persistence, validation, authentication and parsing
+  data/         Local JSON records (created at runtime; not committed)
+render.yaml     Render Blueprint configuration
 ```
 
-The checks cover health, registration/login/session isolation, profile persistence, deterministic ATS scoring, authenticated skill analysis and invalid resume types. Manual deployment smoke checks should additionally cover SMTP delivery, Gemini's configured and unavailable cases, and a real browser at desktop and mobile widths.
+---
 
-## Deploy from GitHub
-
-The repository root includes a Render Blueprint (`render.yaml`) and a Vercel config under `frontend/`.
-
-1. Push the project to a GitHub repository.
-2. In Render, create a Blueprint from that repository using the root `render.yaml`. It sets the service root to `backend/`, configures the health check, and mounts persistent data at `/var/data`.
-3. In Vercel, import the same repository and set the project root directory to `frontend/`. The site is static and needs no build command.
-4. After both providers create their public URLs, set `FRONTEND_URL` in Render to the exact Vercel site origin. Set the API base in `frontend/js/config.js` to the Render service URL followed by `/api`, then redeploy Vercel.
-5. `GEMINI_API_KEY` is optional; without it, the API uses the app's local fallback responses. Add it in Render's environment settings if you want Gemini responses. Do not commit `.env` files or API keys.
-
-The API's persistent disk is defined in the Render Blueprint. Confirm the selected Render plan supports that disk before creating the service.
+<div align="center">
+  <sub>Built to make career progress feel practical, visible and yours.</sub>
+</div>
