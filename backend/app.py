@@ -1,5 +1,6 @@
 """AI Career Intelligence Platform REST API."""
 import os
+import re
 import secrets
 from datetime import timedelta
 from flask import Flask, jsonify, request, session
@@ -21,7 +22,13 @@ app.config.update(
     SESSION_COOKIE_SECURE=os.getenv("FRONTEND_URL", "").startswith("https://"),
 )
 origins = [x.strip() for x in os.getenv("FRONTEND_URL", "http://localhost:5500,http://127.0.0.1:5500").split(",") if x.strip()]
-CORS(app, supports_credentials=True, origins=origins)
+# Allow this app's Vercel deployment previews as well as the configured
+# production origin. Preview deployments get a new hashed hostname each time,
+# so listing one exact preview URL would break registration on the next build.
+vercel_preview_origin = re.compile(
+    r"^https://ai-career-intelligence-platform-frontend-[a-z0-9-]+\.vercel\.app$"
+)
+CORS(app, supports_credentials=True, origins=[*origins, vercel_preview_origin])
 register_blueprints(app)
 
 @app.before_request
