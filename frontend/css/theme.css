@@ -457,3 +457,10 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{display:non
 .landing .top-actions .button-quiet{min-height:42px;padding:0 16px;border:1px solid rgba(221,185,138,.2);background:rgba(255,255,255,.035);color:#eee8de}
 .landing .top-actions .button-quiet:hover{background:rgba(221,185,138,.1);border-color:rgba(221,185,138,.5)}
 @media(max-width:680px){.landing .topbar{height:auto;min-height:66px;flex-wrap:wrap;row-gap:10px;padding:10px 0 12px}.landing .topbar nav{order:3;width:100%;justify-content:center;margin:0;gap:8px}.landing .topbar nav a{min-height:36px;padding:0 13px;font-size:12px}.landing .top-actions .button-quiet{display:none}}
+
+/* Give profile fields their own breathing room and balance the final basic field. */
+#app[data-view="profile"] #profile-form>.grid{gap:16px;margin-bottom:20px}
+#app[data-view="profile"] #profile-form>.grid>.field:last-child{grid-column:1/-1}
+#app[data-view="profile"] #profile-form>.field{margin:0 0 18px!important;padding:15px 16px!important;border-color:rgba(221,185,138,.18);border-radius:14px;background:linear-gradient(145deg,rgba(221,185,138,.055),rgba(255,255,255,.014))}
+#app[data-view="profile"] #profile-form>.field:last-of-type{margin-bottom:16px!important}
+#app[data-view="profile"] #profile-form>.button{margin-top:2px}
